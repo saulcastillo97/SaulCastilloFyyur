@@ -15,6 +15,7 @@ from logging import Formatter, FileHandler
 from flask_wtf import Form
 from flask_migrate import Migrate
 from forms import *
+
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -62,7 +63,7 @@ class Artist(db.Model):
   phone = db.Column(db.String(120))
   image_link = db.Column(db.String(500))
   facebook_link = db.Column(db.String(120))
-  website = db.column(db.String(120))
+  website = db.Column(db.String(120))
   seeking_venue = db.Column(db.Boolean, default=False)
   seeking_description = db.Column(db.String(300))
   shows = db.relationship('Show', backref='Artist', lazy=True)
@@ -70,7 +71,7 @@ class Artist(db.Model):
   def __repr__(self):
     return f'Artist {self.id}: {self.name}'
 
-class Shows(db.Model):
+class Show(db.Model):
   __tablename__ = 'Show'
 
   id = db.Column(db.Integer, primary_key=True)
