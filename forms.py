@@ -4,9 +4,6 @@ from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField
 from wtforms.validators import DataRequired, AnyOf, URL
 
 class ShowForm(Form):
-    name = StringField(
-        'name'
-    )
     artist_id = StringField(
         'artist_id'
     )
@@ -23,6 +20,9 @@ class ShowForm(Form):
     )
 
 class VenueForm(Form):
+    id = StringField(
+        'name'
+    )
     name = StringField(
         'name', validators=[DataRequired()]
     )
@@ -94,8 +94,8 @@ class VenueForm(Form):
     image_link = StringField(
         'image_link'
     )
-    website_link = StringField(
-        'website_link'
+    website = StringField(
+        'website'
     )
     seeking_talent = SelectField(
         'seeking_talent', validators=[DataRequired()],
@@ -105,7 +105,7 @@ class VenueForm(Form):
         ]
     )
     seeking_description = StringField(
-        'seeking_description',
+        'seeking_description'
     )
     genres = SelectMultipleField(
         # TODO implement enum restriction
@@ -137,6 +137,9 @@ class VenueForm(Form):
     )
 
 class ArtistForm(Form):
+    id = StringField(
+        'id'
+    )
     name = StringField(
         'name', validators=[DataRequired()]
     )
@@ -235,8 +238,8 @@ class ArtistForm(Form):
         # TODO implement enum restriction
         'facebook_link', validators=[URL()]
     )
-    website_link = StringField(
-        'website_link'
+    website = StringField(
+        'website'
     )
     seeking_talent = SelectField(
         'seeking_talent', validators=[DataRequired()],
