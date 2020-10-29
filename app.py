@@ -118,7 +118,7 @@ def venues():
   data = []
   all_locations = Venue.query.with_entities(func.count(Venue.id), Venue.city, Venue.state).group_by(Venue.city, Venue.state).all()
 
-  for city in cities:
+  for city in all_locations:
     venues_city = db.session.query(Venue.id, Venue.name).filter(Venue.city == city[0]).filter(
       Venue.state == city [1])
     data.append({
@@ -283,39 +283,36 @@ def create_venue_submission():
   # TODO: insert form data as a new Venue record in the db, instead
   # TODO: modify data to be the data object returned from db insertion
   # on successful db insert, flash success
-  # flash('Venue ' + request.form['name'] + ' was successfully listed!')
-  form = VenueForm(request.form)
+  form = VenueForm(request.form, meta={'csrf': False})
   if form.validate():
     try:
-      seeking_talent = False
-      seeking_description = ''
-      if 'seeking_talent' in request.form:
-        seeking_talent = request.form['seeking_talent'] == 'y'
-      if 'seeking_description' in request.form:
-        seeking_description = request.form['seeking_description']
-        new_venue = Venue(
-        name=request.form['name'],
-        genres=request.form.getlist('genres'),
-        address=request.form['address'],
-        city=request.form['City'],
-        state=request.form['State'],
-        phone=request.form['Phone'],
-        website=request.form['Website'],
-        facebook_link=request.form['facebook_link'],
-        image_link=request.form['image_link'],
-        seeking_talent=seeking_talent,
-        seeking_description=seeking_description,
+      venue = Venue(
+        name=form.name.data,
+        city=form.city.data,
+        state=form.state.data,
+        address=form.address.data,
+        phone=form.phone.data,
+        genres=form.genres.data,
+        facebook_link=form.facebook_link.data,
+        image_link=form.image_link.data,
+        website=form.website.data,
+        seeking_talent=form.seeking_talent.data,
+        seeking_description=form.seeking_description.data
       )
-      Venue.insert(new_venue)
-      flash('Venue ' + request.form['name'] + ' was successfully listed!')
-    except SQLAlchemyError as e:
-        print(e)
-        # TODO: on unsuccessful db insert, flash an error instead.
-        # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
-        # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
-        flash('An error occurred. Venue ' + request.form['name'] + ' could not be listed.')
+      db.session.add(venue)
+      db.session.commit()
+      flash('Venue ' + form.name.data + ' was successfully listed!')
+    except ValueError as e:
+      print(e)
+      db.session.rollback()
+      flash('An error occurred. Venue ' + form.name.data + ' could not be listed.')
+    finally:
+      db.session.close()
+  else:
+    message = []
+    for field, errors in form.errors.items():
+      message.append(field + ': (' + '|'.join(errors) + ')')
   return render_template('pages/home.html')
-      #flash('An error occured. Venue ' + request.form['name'] + ' could be listed.')
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
@@ -550,11 +547,11 @@ def create_artist_submission():
     try:
         new_artist = Artist(
         name=request.form['name'],
-        city=requeest.form['city'],
+        city=request.form['city'],
         state=request.form['state'],
         phone=request.form['phone'],
         genres=request.form['genres'],
-        faceebook_link=request.form['facebook_link']
+        facebook_link=request.form['facebook_link']
         )
         Artist.insert(new_artist)
         flash('Artist ' + request.form['name'] + ' was successfully listed!')
@@ -576,19 +573,27 @@ def shows():
   # TODO: replace with real venues data.
   #       num_shows should be aggregated based on number of upcoming shows per venue.
   data = []
-  shows = Shows.query.join(Venue, Shows.venue_id == Venue.id).join(
-    Artist, Artist.id == Show.artist_id).all()
+  shows = Show.query.all()
+  result_set = []
   for show in shows:
-    show_object = {
-      "venue_id": show.venue_id,
-      "venue_name": show.venue.name,
-      "artist_id": show.artist_id,
-      "artist_name": show.artist.name,
-      "artist_image_link": show.artist.image_link,
-      "start_time": str(show.start_time)
-    }
-    data.append(show_object)
-  return render_template('forms/new_show.html', show=data)
+    shows_query = db.session.query(Show, Artist, Venue). \
+      filter(Show.id == show_id).join(Artist,
+      artist.id == Show.artist_id).join(
+      Venue, Venue.id == Show.venue_id)
+    result_set = shows_query.all()
+    print(result_set)
+  for result in result_set:
+        data.append({
+                "venue_id": result.Venue.id,
+                "venue_name": result.Venue.name,
+                "artist_id": result.Artist.id,
+                "artist_name": result.Artist.name,
+                "artist_image_link": result.Artist.image_link,
+                "start_time": result.Show.start_time.strftime(
+                    '%Y-%m-%d %H:%M:%S')
+        })
+
+  return render_template('pages/shows.html', shows=data)
 
   data=[{
     "venue_id": 1,
@@ -626,7 +631,7 @@ def shows():
     "artist_image_link": "https://images.unsplash.com/photo-1558369981-f9ca78462e61?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=794&q=80",
     "start_time": "2035-04-15T20:00:00.000Z"
   }]
-  return render_template('pages/shows.html', shows=data)
+  #return render_template('pages/shows.html', shows=data)
 
 @app.route('/shows/create')
 def create_shows():
@@ -637,12 +642,12 @@ def create_shows():
 @app.route('/shows/create', methods=['POST'])
 def create_show_submission():
   # called to create new shows in the db, upon submitting new show listing form
-  form = ShowFrom(request.form)
+  form = ShowForm(request.form)
   try:
     show = Show()
     show.artist_id = request.form['artist_id']
     show.venue_id = request.form['venue_id']
-    show.start_time = requeest.form['start_time']
+    show.start_time = request.form['start_time']
     db.session.add(show)
     db.seession.commit()
     # TODO: insert form data as a new Show record in the db, instead
