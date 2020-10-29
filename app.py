@@ -562,7 +562,7 @@ def create_artist_submission():
         flash('An error occurred. Artist ' + request.form['name'] + ' could not be listed! ')
     finally:
         db.session.close()
-    return render_template('pages/home.html')
+  return render_template('pages/home.html')
 
 #  Shows
 #  ----------------------------------------------------------------

@@ -128,9 +128,10 @@ class VenueForm(Form):
     seeking_talent = SelectField(
         'seeking_talent', validators=[DataRequired()],
         choices=[
-            ('True', 'True'),
-            ('False', 'False'),
-        ]
+            (True, 'Yes'),
+            (False, 'No'),
+        ],
+        coerce=lambda x: x == 'True'
     )
     seeking_description = StringField(
         'seeking_description',
@@ -181,8 +182,8 @@ class ArtistForm(Form):
     seeking_talent = SelectField(
         'seeking_venue', validators=[DataRequired()],
         choices=[
-            ('True', 'True'),
-            ('False', 'False'),
+            (True, 'Yes'),
+            (False, 'No'),
         ]
     )
     seeking_description = StringField(
