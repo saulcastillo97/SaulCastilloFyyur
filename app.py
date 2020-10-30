@@ -11,8 +11,9 @@ from sqlalchemy import cast, String, func, distinct, ARRAY, table
 from sqlalchemy.dialects import postgresql
 from flask_sqlalchemy import SQLAlchemy
 import logging
+import re
 from logging import Formatter, FileHandler
-from flask_wtf import Form
+from flask_wtf import Form, validators
 from flask_migrate import Migrate
 from forms import *
 
@@ -357,7 +358,7 @@ def artists():
   data = []
 
   for artist in all_artists:
-    reponse = {
+    response = {
       "id": artist.id,
       "name": artist.name
     }
@@ -543,28 +544,60 @@ def create_artist_submission():
     # called upon submitting the new artist listing form
     # TODO: insert form data as a new Venue record in the db, instead
     # TODO: modify data to be the data object returned from db insertion
-  form = ArtistForm(request.form)
+#  form = ArtistForm(request.form)
+#  if form.validate():
+#    try:
+#        new_artist = Artist(
+#        name=request.form['name'],
+#        city=request.form['city'],
+#        state=request.form['state'],
+#        phone=request.form['phone'],
+#        genres=request.form['genres'],
+#        facebook_link=request.form['facebook_link']
+#        )
+#        Artist.insert(new_artist)
+#        flash('Artist ' + request.form['name'] + ' was successfully listed!')
+#    except SQLAlchemyError as e:
+#        print("ERROR HAS OCCURED")
+#        print(e)
+#        # TODO: on unsuccessful db insert, flash an error instead.
+#        # e.g., flash('An error occurred. Artist ' + data.name + ' could not be listed.')
+#        flash('An error occurred. Artist ' + request.form['name'] + ' could not be listed! ')
+#    finally:
+#        db.session.close()
+#  return render_template('pages/home.html')
+#----------
+  form = ArtistForm(request.form, meta={'csrf': False})
   if form.validate():
     try:
-        new_artist = Artist(
-        name=request.form['name'],
-        city=request.form['city'],
-        state=request.form['state'],
-        phone=request.form['phone'],
-        genres=request.form['genres'],
-        facebook_link=request.form['facebook_link']
-        )
-        Artist.insert(new_artist)
-        flash('Artist ' + request.form['name'] + ' was successfully listed!')
-    except SQLAlchemyError as e:
-        print(e)
-        # TODO: on unsuccessful db insert, flash an error instead.
-        # e.g., flash('An error occurred. Artist ' + data.name + ' could not be listed.')
-        flash('An error occurred. Artist ' + request.form['name'] + ' could not be listed! ')
+      new_artist = Artist(
+        name=form.name.data,
+        city=form.city.data,
+        state=form.state.data,
+        phone=form.phone.data,
+        genres=form.genres.data,
+        facebook_link=form.facebook_link.data,
+        #image_link=form.image_link.data,
+        #website=form.website.data,
+        #seeking_venue=form.seeking_venue.data,
+        #seeking_description=form.seeking_description.data
+      )
+      db.session.add(new_artist)
+      db.session.commit()
+      flash('Artist ' + form.name.data + ' was successfully listed!')
+    except ValueError as e:
+      print(e)
+      db.session.rollback()
+      flash('An error occurred. Artist ' + form.name.data + ' could not be listed.')
     finally:
-        db.session.close()
+      db.session.close()
+  else:
+    print("ERROR HAS OCCURED")
+    message = []
+    for field, errors in form.errors.items():
+      message.append(field + ': (' + '|'.join(errors) + ')')
   return render_template('pages/home.html')
-
+#-------
 #  Shows
 #  ----------------------------------------------------------------
 
