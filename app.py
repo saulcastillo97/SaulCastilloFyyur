@@ -309,6 +309,7 @@ def create_venue_submission():
     finally:
       db.session.close()
   else:
+    print("ERROR HAS OCCURED")
     message = []
     for field, errors in form.errors.items():
       message.append(field + ': (' + '|'.join(errors) + ')')
