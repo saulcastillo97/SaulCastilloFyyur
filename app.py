@@ -16,6 +16,7 @@ from logging import Formatter, FileHandler
 from flask_wtf import Form, validators
 from flask_migrate import Migrate
 from forms import *
+import sys
 
 #----------------------------------------------------------------------------#
 # App Config.
@@ -305,12 +306,14 @@ def create_venue_submission():
       flash('Venue ' + form.name.data + ' was successfully listed!')
     except ValueError as e:
       print(e)
+      print(sys.exc_info())
       db.session.rollback()
       flash('An error occurred. Venue ' + form.name.data + ' could not be listed.')
     finally:
       db.session.close()
   else:
     print("ERROR HAS OCCURED")
+    print(sys.exc_info())
     message = []
     for field, errors in form.errors.items():
       message.append(field + ': (' + '|'.join(errors) + ')')
