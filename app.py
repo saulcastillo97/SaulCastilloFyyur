@@ -124,9 +124,12 @@ def venues():
     venues_city = db.session.query(Venue.id, Venue.name).filter(Venue.city == city[0]).filter(
       Venue.state == city [1])
     data.append({
-      "city": city[0],
-      "state": city[1],
-      "venues": venues_city
+        "city": city.city,
+        "state": city.state,
+        "venues": venues_city,
+      #"city": city[0],
+      #"state": city[1],
+      #"venues": venues_city
   })
 # data=[{
 #    "city": "San Francisco",
