@@ -130,7 +130,7 @@ class VenueForm(Form):
         'facebook_link', validators=[URL()]
     )
     website = StringField(
-        'website', URL()]
+        'website', validators=[URL()]
     )
     seeking_talent = SelectField(
         'seeking_talent',
