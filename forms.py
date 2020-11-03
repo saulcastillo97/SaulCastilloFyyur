@@ -3,6 +3,7 @@ from flask_wtf import Form
 from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField
 from wtforms.validators import DataRequired, AnyOf, URL
 from wtforms.validators import Regexp
+from wtforms import BooleanField
 import re
 
 state_choices = [
@@ -89,9 +90,9 @@ class ShowForm(Form):
     )
     venue_id = StringField(
         'venue_id'
-    )
-    image_link = StringField(
-        'image_link'
+    #)
+    #image_link = StringField(
+    #    'image_link'
     )
     start_time = DateTimeField(
         'start_time',
@@ -100,14 +101,6 @@ class ShowForm(Form):
     )
 #-----------------
 class VenueForm(Form):
-    #def validate_phone(form, field):
-    #    if not re.search(r"^[0-9]{3}-[0-9]{3}-[0-9]{4}$", field.data):
-    #        raise ValidationError("Invalid phone number.")
-    #def validate_genres(form, field):
-    #    genres_values = [choice[1] for choice in genres_choices]
-    #    for value in field.data:
-    #        if value not in genres_values:
-    #            raise ValidationError('Invalid genres value.')
     name = StringField(
         'name', validators=[DataRequired()]
     )
@@ -134,74 +127,34 @@ class VenueForm(Form):
         choices=genres_choices
     )
     facebook_link = StringField(
-        'facebook_link', validators=[DataRequired(), URL()]
+        'facebook_link', validators=[URL()]
     )
     website = StringField(
         'website', validators=[DataRequired(), URL()]
     )
     seeking_talent = SelectField(
-       'seeking_talent', validators=[DataRequired()],
-       choices=[
-            (True, 'Yes'),
-            (False, 'No')
-       ],
-       coerce=lambda x: x == 'True'
+        'seeking_talent',
+        choices=[
+            (False, 'Not seeking talent'),
+            (True, 'Seeking talent')], coerce=lambda x: x == 'True'
+        #'seeking_venue', validators=[DataRequired()]
     )
+    #seeking_talent = BooleanField(
+        #'seeking_talent', validators=[DataRequired()],
+    #)
+    #seeking_talent = SelectField(
+    #   'seeking_talent', validators=[DataRequired()],
+    #   choices=[
+    #        (True, 'Yes'),
+    #        (False, 'No')
+    #   ],
+    #   coerce=lambda x: x == 'True'
+    #)
     seeking_description = StringField(
         'seeking_description'
     )
 
-#-----------------
-#class VenueForm(Form):
-    #venue_id = StringField(
-    #    'venue_id', validators=[DataRequired()]
-    #)
-    #name = StringField(
-    #    'name', validators=[DataRequired()]
-    #)
-    #city = StringField(
-    #    'city', validators=[DataRequired()]
-    #)
-    #state = SelectField(
-    #    'state', validators=[DataRequired()],
-    #    choices=state_choices
-    #)
-    #address = StringField(
-    #    'address', validators=[DataRequired()]
-    #)
-    #phone = StringField(
-    #    'phone'
-    #)
-    #image_link = StringField(
-    #    'image_link'
-    #)
-    #website = StringField(
-    #    'website', validators=[URL()]
-    #)
-    #seeking_talent = SelectField(
-    #    'seeking_talent', validators=[DataRequired()],
-    #    choices=[
-    #        (True, 'Yes'),
-    #        (False, 'No'),
-    #    ],
-    #    coerce=lambda x: x == 'True'
-    #)
-    #seeking_description = StringField(
-    #    'seeking_description',
-    #)
-    #genres = SelectMultipleField(
-    #    # TODO implement enum restriction
-    #    'genres', validators=[DataRequired()],
-    #    choices=genres_choices
-    #)
-    #facebook_link = StringField(
-    #    'facebook_link', validators=[URL()]
-    #)
-
 class ArtistForm(Form):
-    #artist_id = StringField(
-    #    'artist_id', validators=[DataRequired()]
-    #)
     name = StringField(
         'name', validators=[DataRequired()]
     )
@@ -232,11 +185,11 @@ class ArtistForm(Form):
         'website', validators=[URL()]
     )
     seeking_venue = SelectField(
-        'seeking_venue', validators=[DataRequired()],
+        'seeking_talent',
         choices=[
-            (True, 'Yes'),
-            (False, 'No'),
-        ]
+            (False, 'Not seeking venue'),
+            (True, 'Seeking venue')], coerce=lambda x: x == 'True'
+        #'seeking_venue', validators=[DataRequired()]
     )
     seeking_description = StringField(
         'seeking_description'
